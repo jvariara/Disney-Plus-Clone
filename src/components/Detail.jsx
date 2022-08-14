@@ -1,109 +1,151 @@
-import React from "react";
 import styled from "styled-components";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import db from "../firebase";
 
-function Detail() {
+const Detail = () => {
+  const { id } = useParams();
+  const [detailData, setDetailData] = useState({});
+
+  useEffect(() => {
+    db.collection("movies")
+      .doc(id)
+      .get()
+      .then((doc) => {
+        if (doc.exists) {
+          setDetailData(doc.data());
+        } else {
+          console.log("not such document in firebase");
+        }
+      })
+      .catch((err) => console.log("Error getting document:", err));
+  }, [id]);
+
   return (
     <Container>
       <Background>
-        <img
-          src="https://prod-ripcut-delivery.disney-plus.net/v1/variant/disney/4F39B7E16726ECF419DD7C49E011DD95099AA20A962B0B10AA1881A70661CE45/scale?width=1440&aspectRatio=1.78&format=jpeg"
-          alt=""
-        />
+        <img src={detailData.backgroundImg} alt={detailData.title} />
       </Background>
-      <ImageTtitle>
-        <img
-          src="https://prod-ripcut-delivery.disney-plus.net/v1/variant/disney/D7AEE1F05D10FC37C873176AAA26F777FC1B71E7A6563F36C6B1B497CAB1CEC2/scale?width=1440&aspectRatio=1.78"
-          alt=""
-        />
-      </ImageTtitle>
-      <Controls>
-        <PlayButton>
-          <img src="./images/play-icon-black.png" alt="" />
-          <span>PLAY</span>
-        </PlayButton>
-        <TrailerButton>
-          <img src="./images/play-icon-white.png" alt="" />
-          <span>TRAILER</span>
-        </TrailerButton>
-        <AddButton>
-          <span>+</span>
-        </AddButton>
-        <GroupWatchButton>
-          <img src="./images/group-icon.png" alt="" />
-        </GroupWatchButton>
-      </Controls>
-      <SubTitle>2018 * 7m * Family, Fantasy, Kids, Animation</SubTitle>
-      <Description>
-        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Dolorum
-        distinctio cupiditate eos neque deleniti fugiat fugit voluptates numquam
-        nihil accusamus iure commodi adipisci, unde nisi quidem tenetur,
-        molestias itaque odio.
-      </Description>
+
+      <ImageTitle>
+        <img src={detailData.titleImg} alt={detailData.title} />
+      </ImageTitle>
+
+      <ContentMeta>
+        <Controls>
+          <PlayButton>
+            <img src="/images/play-icon-black.png" alt="" />
+            <span>PLAY</span>
+          </PlayButton>
+          <TrailerButton>
+            <img src="/images/play-icon-white.png" alt="" />
+            <span>TRAILER</span>
+          </TrailerButton>
+          <AddList>
+            <span />
+            <span />
+          </AddList>
+          <GroupWatchButton>
+            <div>
+              <img src="/images/group-icon.png" alt="" />
+            </div>
+          </GroupWatchButton>
+        </Controls>
+        <SubTitle>{detailData.subTitle}</SubTitle>
+        <Description>{detailData.description}</Description>
+      </ContentMeta>
     </Container>
   );
-}
+};
 
 export default Detail;
 
 const Container = styled.div`
-  min-height: calc(100vh - 70px);
-  padding: 0 calc(3.5vw + 5px);
   position: relative;
+  min-height: calc(100vh-250px);
+  overflow-x: hidden;
+  display: block;
+  top: 72px;
+  padding: 0 calc(3.5vw + 5px);
 `;
 
 const Background = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  z-index: -1;
+  left: 0px;
   opacity: 0.8;
-
+  position: fixed;
+  right: 0px;
+  top: 0px;
+  z-index: -1;
   img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    width: 100vw;
+    height: 100vh;
+    @media (max-width: 768px) {
+      width: initial;
+    }
   }
 `;
 
-const ImageTtitle = styled.div`
-  height: 30vh;
+const ImageTitle = styled.div`
+  align-items: flex-end;
+  display: flex;
+  -webkit-box-pack: start;
+  justify-content: flex-start;
+  margin: 0px auto;
+  height: 30vw;
   min-height: 170px;
-  width: 35vw;
-  min-width: 200px;
-  margin-top: 60px;
-
+  padding-bottom: 24px;
+  width: 100%;
   img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
+    max-width: 600px;
+    min-width: 200px;
+    width: 35vw;
   }
+`;
+
+const ContentMeta = styled.div`
+  max-width: 874px;
 `;
 
 const Controls = styled.div`
-  display: flex;
   align-items: center;
+  display: flex;
+  flex-flow: row nowrap;
+  margin: 24px 0px;
+  min-height: 56px;
 `;
 
 const PlayButton = styled.button`
-  border-radius: 4px;
   font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 1.6px;
+  margin: 0px 22px 0px 0px;
+  padding: 0px 24px;
+  height: 56px;
+  border-radius: 4px;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  height: 56px;
-  background-color: rgb(249, 249, 249);
-  border: none;
-  padding: 0 24px;
-  margin-right: 24px;
-  cursor: pointer;
-  transition: all 250ms ease;
+  justify-content: center;
+  letter-spacing: 1.8px;
+  text-align: center;
   text-transform: uppercase;
+  background: rgb (249, 249, 249);
+  border: none;
+  color: rgb(0, 0, 0);
+  transition: all 250ms ease;
 
+  img {
+    width: 32px;
+  }
   &:hover {
     background: rgb(198, 198, 198);
+  }
+  @media (max-width: 768px) {
+    height: 45px;
+    padding: 0px 12px;
+    font-size: 12px;
+    margin: 0px 10px 0px 0px;
+    img {
+      width: 25px;
+    }
   }
 `;
 
@@ -113,44 +155,68 @@ const TrailerButton = styled(PlayButton)`
   color: rgb(249, 249, 249);
 `;
 
-const AddButton = styled.button`
-  width: 44px;
-  height: 44px;
+const AddList = styled.div`
   margin-right: 16px;
+  height: 44px;
+  width: 44px;
   display: flex;
-  align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  cursor: pointer;
-  border: 2px solid #fff;
+  align-items: center;
   background-color: rgba(0, 0, 0, 0.6);
-  transition: all 250ms ease;
-
+  border-radius: 50%;
+  border: 2px solid white;
+  cursor: pointer;
   span {
-    font-size: 30px;
-    color: #fff;
-  }
-
-  &:hover {
-    background: rgb(198, 198, 198);
+    background-color: rgb(249, 249, 249);
+    display: inline-block;
+    &:first-child {
+      height: 2px;
+      transform: translate(1px, 0px) rotate(0deg);
+      width: 16px;
+    }
+    &:nth-child(2) {
+      height: 16px;
+      transform: translateX(-8px) rotate(0deg);
+      width: 2px;
+    }
   }
 `;
 
-const GroupWatchButton = styled(AddButton)`
-  background-color: #000;
+const GroupWatchButton = styled.div`
+  height: 44px;
+  width: 44px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  background: white;
+  div {
+    height: 40px;
+    width: 40px;
+    background: rgb(0, 0, 0);
+    border-radius: 50%;
+    img {
+      width: 100%;
+    }
+  }
 `;
 
 const SubTitle = styled.div`
   color: rgb(249, 249, 249);
   font-size: 15px;
   min-height: 20px;
-  margin-top: 26px;
+  @media (max-width: 768px) {
+    font-size: 12px;
+  }
 `;
 
 const Description = styled.div`
   line-height: 1.4;
   font-size: 20px;
-  margin-top: 16px;
+  padding: 16px 0px;
   color: rgb(249, 249, 249);
-  max-width: 760px;
-`
+  @media (max-width: 768px) {
+    font-size: 14px;
+  }
+`;
